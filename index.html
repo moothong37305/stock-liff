@@ -13,27 +13,33 @@
     --orange:#F47920; --orange-l:#FFF1E6;
     --green:#1F9D55; --red:#D64545; --grey:#8A94A6;
     --bg:#F4F6FA; --card:#FFFFFF; --text:#1C2433; --line:#E3E8F0;
+    --safe-b:env(safe-area-inset-bottom, 0px);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans Thai',system-ui,sans-serif;font-size:15px}
   button,input,select,textarea{font:inherit}
   .hidden{display:none!important}
 
-  header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--blue-d),var(--blue));color:#fff;
-    padding:14px 16px 12px;border-bottom:4px solid var(--orange)}
-  header .t{font-size:18px;font-weight:700}
-  header .s{font-size:12px;opacity:.85}
-  header .who{float:right;background:rgba(255,255,255,.15);border-radius:999px;padding:4px 10px;font-size:12px;margin-top:4px}
+  /* หัว + แท็บอยู่ด้านบนทั้งหมด (ไม่ซ้อนกับแถบด้านล่างของ LINE/มือถือ) */
+  .top{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--blue-d),var(--blue));color:#fff;box-shadow:0 2px 10px rgba(18,63,134,.25)}
+  .top-in{max-width:760px;margin:0 auto;padding:12px 16px 0}
+  .top .row{display:flex;align-items:center;gap:10px}
+  .top .t{font-size:17px;font-weight:700;line-height:1.2}
+  .top .s{font-size:11.5px;opacity:.85}
+  .top .who{margin-left:auto;background:rgba(255,255,255,.16);border-radius:999px;padding:4px 10px;font-size:12px;white-space:nowrap;max-width:46%;overflow:hidden;text-overflow:ellipsis}
+  .tabs{display:flex;gap:4px;margin-top:10px}
+  .tabs button{flex:1;border:0;background:transparent;color:rgba(255,255,255,.78);padding:9px 4px 10px;font-size:13.5px;font-weight:600;
+    border-bottom:3px solid transparent;position:relative;white-space:nowrap}
+  .tabs button.on{color:#fff;border-bottom-color:var(--orange)}
+  .tabs .dot{display:inline-block;margin-left:4px;background:var(--orange);color:#fff;font-size:10.5px;border-radius:999px;padding:0 6px;min-width:18px;line-height:17px;vertical-align:1px}
 
-  main{padding:14px 16px 110px;max-width:640px;margin:0 auto}
+  main{padding:14px 16px calc(96px + var(--safe-b));max-width:760px;margin:0 auto}
   .card{background:var(--card);border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(20,40,80,.08);margin-bottom:10px}
   h2{font-size:17px;margin:4px 0 12px}
   label{display:block;font-size:13px;color:#4A5568;margin:10px 0 4px}
-  input[type=text],input[type=search],input[type=number],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);
-    border-radius:10px;background:#fff;outline:none}
+  input[type=text],input[type=search],input[type=number],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none}
   input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l)}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;padding:11px 16px;
-    font-weight:600;cursor:pointer}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;padding:11px 16px;font-weight:600;cursor:pointer}
   .btn.primary{background:var(--blue);color:#fff}
   .btn.orange{background:var(--orange);color:#fff}
   .btn.ghost{background:#EEF1F6;color:var(--text)}
@@ -42,47 +48,52 @@
   .btn:disabled{opacity:.5}
 
   .filters{display:flex;gap:8px;margin-bottom:10px}
-  .filters input{flex:1}
+  .filters input{flex:1;min-width:0}
   .filters select{width:38%}
+  .count{font-size:12px;color:var(--grey);margin:-2px 2px 8px}
 
-  .item{display:flex;align-items:center;gap:10px}
+  .item{display:flex;align-items:center;gap:12px;cursor:pointer}
+  .item .pic{width:52px;height:52px;border-radius:10px;flex:none;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden}
+  .item .pic img{width:100%;height:100%;object-fit:cover}
   .item .info{flex:1;min-width:0}
   .item .name{font-weight:600;line-height:1.35}
-  .item .meta{font-size:12px;color:var(--grey);margin-top:2px}
+  .item .meta{font-size:12px;color:var(--grey);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .more{font-size:12px;color:var(--blue);margin-left:6px;white-space:nowrap}
   .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;font-weight:600}
   .b-ok{background:var(--blue-l);color:var(--blue)}
   .b-zero{background:#FCE8E8;color:var(--red)}
   .b-pending{background:var(--orange-l);color:var(--orange)}
   .b-approved{background:#E4F6EC;color:var(--green)}
   .b-rejected{background:#FCE8E8;color:var(--red)}
-  .add{width:40px;height:40px;border-radius:12px;border:0;background:var(--orange);color:#fff;font-size:22px;font-weight:700}
+  .add{width:44px;height:44px;border-radius:12px;border:0;background:var(--orange);color:#fff;font-size:22px;font-weight:700;flex:none}
   .add.in{background:var(--green)}
   .add:disabled{background:#D5DBE5}
-  .more{text-align:center;color:var(--grey);font-size:13px;padding:6px}
+  .more-note{text-align:center;color:var(--grey);font-size:13px;padding:6px}
 
-  .cartbar{position:fixed;left:0;right:0;bottom:64px;z-index:15;padding:0 16px}
-  .cartbar .btn{max-width:608px;margin:0 auto;display:flex;box-shadow:0 6px 18px rgba(244,121,32,.35)}
-
-  nav{position:fixed;left:0;right:0;bottom:0;z-index:16;background:#fff;border-top:1px solid var(--line);display:flex;
-    padding-bottom:env(safe-area-inset-bottom)}
-  nav button{flex:1;border:0;background:none;padding:9px 0 10px;color:var(--grey);font-size:12px;position:relative}
-  nav button .i{display:block;font-size:20px;line-height:1.2}
-  nav button.on{color:var(--blue);font-weight:700}
-  nav .dot{position:absolute;top:5px;left:50%;margin-left:8px;background:var(--orange);color:#fff;font-size:10px;border-radius:999px;
-    padding:0 5px;min-width:16px}
+  .cartbar{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:10px 16px calc(10px + var(--safe-b));
+    background:linear-gradient(to top,var(--bg) 70%,rgba(244,246,250,0))}
+  .cartbar .btn{max-width:728px;margin:0 auto;display:flex;box-shadow:0 6px 18px rgba(244,121,32,.35)}
 
   .sheet-bg{position:fixed;inset:0;background:rgba(15,25,45,.45);z-index:30}
-  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:#fff;border-radius:18px 18px 0 0;max-height:88vh;
-    overflow:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:#fff;border-radius:18px 18px 0 0;max-height:88vh;overflow:auto;
+    padding:16px 16px calc(16px + var(--safe-b));max-width:760px;margin:0 auto}
   .sheet .grab{width:40px;height:4px;background:#D5DBE5;border-radius:4px;margin:0 auto 12px}
   .cline{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
   .cline .info{flex:1;min-width:0}
   .qty{display:flex;align-items:center;gap:4px}
-  .qty button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:18px}
+  .qty button{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:18px}
   .qty input{width:64px;text-align:center;padding:6px}
-  .rm{border:0;background:none;color:var(--red);font-size:13px}
+  .rm{border:0;background:none;color:var(--red);font-size:13px;padding:2px 0}
 
-  .req .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  /* รายละเอียดพัสดุ */
+  .dimg{width:100%;max-height:240px;object-fit:contain;border-radius:12px;background:var(--blue-l);margin-bottom:12px}
+  .dnoimg{height:110px;border-radius:12px;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:44px;margin-bottom:12px}
+  .dname{font-size:18px;font-weight:700;line-height:1.35;margin-bottom:10px}
+  .dgrid{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:14px;margin-bottom:14px}
+  .dgrid div:nth-child(odd){color:var(--grey)}
+  .dgrid div:nth-child(even){font-weight:600}
+
+  .req .top2{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
   .req .no{font-weight:700;color:var(--blue-d)}
   .req .sub{font-size:12px;color:var(--grey)}
   .req table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
@@ -95,8 +106,7 @@
   .link{color:var(--blue);font-weight:600;text-decoration:none}
 
   .center{text-align:center;padding:40px 10px;color:var(--grey)}
-  .spin{width:36px;height:36px;border:4px solid var(--blue-l);border-top-color:var(--blue);border-radius:50%;margin:0 auto 12px;
-    animation:sp 1s linear infinite}
+  .spin{width:36px;height:36px;border:4px solid var(--blue-l);border-top-color:var(--blue);border-radius:50%;margin:0 auto 12px;animation:sp 1s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
   .toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:50;background:#1C2433;color:#fff;padding:10px 16px;
     border-radius:10px;font-size:14px;max-width:90%;white-space:pre-line;box-shadow:0 6px 20px rgba(0,0,0,.25)}
@@ -105,21 +115,28 @@
 </style>
 </head>
 <body>
-<header>
-  <span class="who hidden" id="who"></span>
-  <div class="t">ระบบเบิกพัสดุ</div>
-  <div class="s">ศูนย์เกษตร อาหาร และพลังงาน สจล. ชุมพร</div>
-</header>
+<div class="top">
+  <div class="top-in">
+    <div class="row">
+      <div><div class="t">ระบบเบิกพัสดุ</div><div class="s">ศูนย์เกษตร อาหาร และพลังงาน สจล. ชุมพร</div></div>
+      <span class="who hidden" id="who"></span>
+    </div>
+    <div class="tabs hidden" id="tabs">
+      <button data-v="items" class="on">📦 เบิกพัสดุ</button>
+      <button data-v="mine">📋 คำขอของฉัน</button>
+      <button data-v="approve" id="tab-approve" class="hidden">✔️ อนุมัติ<span class="dot hidden" id="pend-dot"></span></button>
+    </div>
+  </div>
+</div>
 
 <main>
   <div id="loading" class="center"><div class="spin"></div>กำลังโหลด…</div>
   <div id="fatal" class="center hidden"></div>
 
-  <!-- ลงทะเบียน -->
   <section id="v-register" class="hidden">
     <div class="card">
       <h2>ลงทะเบียนใช้งาน</h2>
-      <p class="sub" style="margin-top:-6px;color:var(--grey);font-size:13px">ลงทะเบียนครั้งเดียว ผู้ดูแลจะอนุมัติบัญชีก่อนเริ่มเบิกพัสดุ</p>
+      <p style="margin-top:-6px;color:var(--grey);font-size:13px">ลงทะเบียนครั้งเดียว ผู้ดูแลจะอนุมัติบัญชีก่อนเริ่มเบิกพัสดุ</p>
       <label>ชื่อ-สกุล *</label>
       <input type="text" id="r-name" placeholder="เช่น นายสมชาย ใจดี">
       <label>หน่วยงาน / ตำแหน่ง</label>
@@ -137,22 +154,20 @@
     </div>
   </section>
 
-  <!-- เบิก -->
   <section id="v-items" class="hidden">
     <div class="filters">
-      <input type="search" id="q" placeholder="ค้นหาชื่อ / รหัสพัสดุ">
+      <input type="search" id="q" placeholder="🔎 ค้นหาชื่อ / รหัสพัสดุ">
       <select id="ftype"><option value="">ทุกประเภท</option></select>
     </div>
+    <div class="count" id="count"></div>
     <div id="items"></div>
   </section>
 
-  <!-- คำขอของฉัน -->
   <section id="v-mine" class="hidden">
     <h2>คำขอของฉัน</h2>
     <div id="mine"></div>
   </section>
 
-  <!-- อนุมัติ -->
   <section id="v-approve" class="hidden">
     <h2>คำขอรออนุมัติ</h2>
     <div id="approve"></div>
@@ -160,12 +175,6 @@
 </main>
 
 <div class="cartbar hidden" id="cartbar"><button class="btn orange block" id="cartbtn"></button></div>
-
-<nav id="nav" class="hidden">
-  <button data-v="items" class="on"><span class="i">📦</span>เบิกพัสดุ</button>
-  <button data-v="mine"><span class="i">📋</span>คำขอของฉัน</button>
-  <button data-v="approve" id="nav-approve" class="hidden"><span class="i">✔️</span>อนุมัติ<span class="dot hidden" id="pend-dot"></span></button>
-</nav>
 
 <!-- ตะกร้า -->
 <div class="sheet-bg hidden" id="sheet-bg"></div>
@@ -181,6 +190,13 @@
   <button class="btn ghost block" id="close-sheet">เลือกรายการเพิ่ม</button>
 </div>
 
+<!-- รายละเอียดพัสดุ -->
+<div class="sheet-bg hidden" id="detail-bg"></div>
+<div class="sheet hidden" id="detail">
+  <div class="grab"></div>
+  <div id="detail-body"></div>
+</div>
+
 <script>
 /* ===== ตั้งค่า ===== */
 const LIFF_ID = '2011955503-BmfqJ0sl';
@@ -190,6 +206,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbzd6x0zhaGDK-r_ZGRGmsVw
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => (Math.round((+n || 0) * 100) / 100).toLocaleString('th-TH', {maximumFractionDigits: 2});
+const money = n => (+n || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 const key = it => it.code + '||' + it.name;
 
 let ME = null, ITEMS = [], CART = [], VIEW = 'items';
@@ -225,10 +242,7 @@ async function main() {
     if (!r.ok) return fatal(r.error);
     ME = r;
     if (!r.user) return show('v-register');
-    if (r.user.status !== 'ใช้งาน') {
-      $('#wait-msg').textContent = 'สถานะบัญชี: ' + r.user.status;
-      return show('v-wait');
-    }
+    if (r.user.status !== 'ใช้งาน') { $('#wait-msg').textContent = 'สถานะบัญชี: ' + r.user.status; return show('v-wait'); }
     startApp();
   } catch (e) { if (e.message !== 'relogin') fatal('เชื่อมต่อระบบไม่สำเร็จ: ' + e.message); }
 }
@@ -246,23 +260,24 @@ $('#r-btn').onclick = async () => {
   } finally { $('#r-btn').disabled = false; }
 };
 
-async function startApp() {
+function startApp() {
   $('#who').textContent = ME.user.name + (ME.user.isApprover ? ' · ' + ME.user.role : '');
   $('#who').classList.remove('hidden');
-  $('#nav').classList.remove('hidden');
-  $('#nav-approve').classList.toggle('hidden', !ME.user.isApprover);
+  $('#tabs').classList.remove('hidden');
+  $('#tab-approve').classList.toggle('hidden', !ME.user.isApprover);
   const page = new URLSearchParams(location.search).get('page');
   go(page === 'approve' && ME.user.isApprover ? 'approve' : page === 'mine' ? 'mine' : 'items');
   if (ME.user.isApprover && page !== 'approve') loadPendingCount();
 }
 
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => go(b.dataset.v));
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => go(b.dataset.v));
 
 function go(v) {
   VIEW = v;
-  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   show('v-' + v);
   renderCartBar();
+  window.scrollTo(0, 0);
   if (v === 'items') loadItems();
   if (v === 'mine') loadMine();
   if (v === 'approve') loadApprove();
@@ -285,22 +300,54 @@ function renderItems() {
   const t = $('#ftype').value;
   const list = ITEMS.filter(i => (!t || i.type === t) && (!q || (i.name + ' ' + i.code).toLowerCase().includes(q)));
   const inCart = new Set(CART.map(c => key(c)));
-  $('#items').innerHTML = list.slice(0, 60).map((it, idx) => `
-    <div class="card item">
+  $('#count').textContent = `พบ ${list.length} รายการ · แตะที่ชื่อเพื่อดูรายละเอียด`;
+  $('#items').innerHTML = list.slice(0, 80).map(it => `
+    <div class="card item" data-k="${esc(key(it))}">
+      <div class="pic">${it.image ? `<img src="${esc(it.image)}" alt="" loading="lazy">` : '📦'}</div>
       <div class="info">
         <div class="name">${esc(it.name)}</div>
         <div class="meta">${esc(it.code || '-')}${it.loc ? ' · ' + esc(it.loc) : ''}</div>
-        <div style="margin-top:6px"><span class="badge ${it.bal > 0 ? 'b-ok' : 'b-zero'}">คงเหลือ ${fmt(it.bal)} ${esc(it.unit)}</span></div>
+        <div style="margin-top:6px"><span class="badge ${it.bal > 0 ? 'b-ok' : 'b-zero'}">คงเหลือ ${fmt(it.bal)} ${esc(it.unit)}</span><span class="more">รายละเอียด ›</span></div>
       </div>
-      <button class="add ${inCart.has(key(it)) ? 'in' : ''}" data-k="${esc(key(it))}" ${it.bal > 0 ? '' : 'disabled'}>
+      <button class="add ${inCart.has(key(it)) ? 'in' : ''}" data-add="${esc(key(it))}" ${it.bal > 0 ? '' : 'disabled'} aria-label="เพิ่มลงรายการเบิก">
         ${inCart.has(key(it)) ? '✓' : '+'}</button>
     </div>`).join('') +
-    (list.length > 60 ? `<div class="more">แสดง 60 จาก ${list.length} รายการ — พิมพ์ค้นหาให้เจาะจงขึ้น</div>` : '') +
+    (list.length > 80 ? `<div class="more-note">แสดง 80 จาก ${list.length} รายการ — พิมพ์ค้นหาให้เจาะจงขึ้น</div>` : '') +
     (!list.length ? '<div class="center">ไม่พบรายการ</div>' : '');
-  document.querySelectorAll('#items .add').forEach(b => b.onclick = () => toggleCart(b.dataset.k));
+  document.querySelectorAll('#items .item').forEach(el => el.onclick = e => {
+    const add = e.target.closest('[data-add]');
+    if (add) { e.stopPropagation(); if (!add.disabled) toggleCart(add.dataset.add); return; }
+    openDetail(el.dataset.k);
+  });
 }
 $('#q').oninput = renderItems;
 $('#ftype').onchange = renderItems;
+
+/* ---------- รายละเอียดพัสดุ ---------- */
+function openDetail(k) {
+  const it = ITEMS.find(x => key(x) === k);
+  if (!it) return;
+  const inCart = CART.some(c => key(c) === k);
+  $('#detail-body').innerHTML = `
+    ${it.image ? `<img class="dimg" src="${esc(it.image)}" alt="">` : '<div class="dnoimg">📦</div>'}
+    <div class="dname">${esc(it.name)}</div>
+    <div class="dgrid">
+      <div>รหัสบัญชี</div><div>${esc(it.code || '-')}</div>
+      <div>คงเหลือ</div><div style="color:${it.bal > 0 ? 'var(--blue)' : 'var(--red)'}">${fmt(it.bal)} ${esc(it.unit)}</div>
+      <div>ราคาต่อหน่วย</div><div>${it.price ? money(it.price) + ' บาท' : '-'}</div>
+      <div>สถานที่จัดเก็บ</div><div>${esc(it.loc || '-')}</div>
+      <div>ประเภท</div><div>${esc(it.type || '-')}</div>
+    </div>
+    <button class="btn ${inCart ? 'ghost' : 'orange'} block" id="d-add" ${it.bal > 0 ? '' : 'disabled'}>
+      ${it.bal > 0 ? (inCart ? 'นำออกจากรายการเบิก' : '+ เพิ่มลงรายการเบิก') : 'ของหมด เบิกไม่ได้'}</button>
+    <div style="height:8px"></div>
+    <button class="btn ghost block" id="d-close">ปิด</button>`;
+  $('#d-add').onclick = () => { toggleCart(k); closeDetail(); };
+  $('#d-close').onclick = closeDetail;
+  $('#detail').classList.remove('hidden'); $('#detail-bg').classList.remove('hidden');
+}
+function closeDetail() { $('#detail').classList.add('hidden'); $('#detail-bg').classList.add('hidden'); }
+$('#detail-bg').onclick = closeDetail;
 
 /* ---------- ตะกร้า ---------- */
 function toggleCart(k) {
@@ -310,12 +357,13 @@ function toggleCart(k) {
     if (CART.length >= 20) return toast('เบิกได้สูงสุด 20 รายการต่อใบ', true);
     const it = ITEMS.find(x => key(x) === k);
     CART.push(Object.assign({qty: 1}, it));
+    toast('เพิ่ม "' + it.name + '" แล้ว');
   }
   renderItems(); renderCartBar();
 }
 function renderCartBar() {
-  const show = VIEW === 'items' && CART.length > 0;
-  $('#cartbar').classList.toggle('hidden', !show);
+  const showBar = VIEW === 'items' && CART.length > 0;
+  $('#cartbar').classList.toggle('hidden', !showBar);
   $('#cartbtn').textContent = `🧺 ตรวจสอบและส่งคำขอ (${CART.length} รายการ)`;
 }
 $('#cartbtn').onclick = openSheet;
@@ -374,14 +422,14 @@ $('#submit').onclick = async () => {
 const BADGE = {'รออนุมัติ': 'b-pending', 'อนุมัติ': 'b-approved', 'ไม่อนุมัติ': 'b-rejected'};
 function reqCard(r, approve) {
   return `<div class="card req">
-    <div class="top">
+    <div class="top2">
       <div><div class="no">${esc(r.no)}</div><div class="sub">${esc(r.dateText)}</div></div>
       <span class="badge ${BADGE[r.status] || ''}">${esc(r.status)}</span>
     </div>
     ${approve ? `<div style="margin-top:8px;font-weight:600">${esc(r.name)}<span class="sub"> ${esc(r.dept)}</span></div>` : ''}
     <div class="note">วัตถุประสงค์: ${esc(r.purpose)}</div>
     <table>${r.lines.map(l => `<tr><td>${esc(l.name)}</td><td class="r">${fmt(l.qty)} ${esc(l.unit)}</td></tr>`).join('')}</table>
-    <div class="tot"><span>มูลค่ารวม</span><span style="color:var(--blue)">${fmt(r.total)} บาท</span></div>
+    <div class="tot"><span>มูลค่ารวม</span><span style="color:var(--blue)">${money(r.total)} บาท</span></div>
     ${r.approver ? `<div class="note">พิจารณาโดย ${esc(r.approver)} · ${esc(r.decidedText)}${r.note ? '<br>หมายเหตุ: ' + esc(r.note) : ''}</div>` : ''}
     ${r.pdf ? `<div style="margin-top:8px"><a class="link" href="#" data-pdf="${esc(r.pdf)}">📄 เปิดใบเบิกพัสดุ (PDF)</a></div>` : ''}
     ${approve ? `<input type="text" placeholder="หมายเหตุ (ถ้ามี)" data-note="${esc(r.no)}" style="margin-top:10px">
@@ -421,7 +469,7 @@ async function loadApprove() {
 }
 
 async function decide(no, act) {
-  if (!confirm((act === 'approve' ? 'อนุมัติและตัดสต๊อค ' : 'ไม่อนุมัติ ') + no + ' ?')) return;
+  if (!confirm((act === 'approve' ? 'อนุมัติและตัดสต็อก ' : 'ไม่อนุมัติ ') + no + ' ?')) return;
   const note = (document.querySelector(`[data-note="${CSS.escape(no)}"]`) || {}).value || '';
   document.querySelectorAll('#approve [data-act]').forEach(b => b.disabled = true);
   try {
