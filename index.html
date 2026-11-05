@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>เบิกพัสดุ</title>
+<title>เบิก-ยืมพัสดุ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -20,33 +20,41 @@
   button,input,select,textarea{font:inherit}
   .hidden{display:none!important}
 
-  /* หัว + แท็บอยู่ด้านบนทั้งหมด (ไม่ซ้อนกับแถบด้านล่างของ LINE/มือถือ) */
   .top{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--blue-d),var(--blue));color:#fff;box-shadow:0 2px 10px rgba(18,63,134,.25)}
   .top-in{max-width:760px;margin:0 auto;padding:12px 16px 0}
   .top .row{display:flex;align-items:center;gap:10px}
   .top .t{font-size:17px;font-weight:700;line-height:1.2}
-  .top .s{font-size:11.5px;opacity:.85}
-  .top .who{margin-left:auto;background:rgba(255,255,255,.16);border-radius:999px;padding:4px 10px;font-size:12px;white-space:nowrap;max-width:46%;overflow:hidden;text-overflow:ellipsis}
-  .tabs{display:flex;gap:4px;margin-top:10px}
-  .tabs button{flex:1;border:0;background:transparent;color:rgba(255,255,255,.78);padding:9px 4px 10px;font-size:13.5px;font-weight:600;
-    border-bottom:3px solid transparent;position:relative;white-space:nowrap}
+  .top .s{font-size:11.5px;opacity:.85;white-space:nowrap}
+  .top .who{margin-left:auto;background:rgba(255,255,255,.16);border-radius:999px;padding:4px 10px;font-size:12px;white-space:nowrap;max-width:42%;overflow:hidden;text-overflow:ellipsis}
+  .tabs{display:flex;gap:2px;margin-top:10px}
+  .tabs button{flex:1;border:0;background:transparent;color:rgba(255,255,255,.78);padding:9px 2px 10px;font-size:13.5px;font-weight:600;
+    border-bottom:3px solid transparent;white-space:nowrap}
   .tabs button.on{color:#fff;border-bottom-color:var(--orange)}
-  .tabs .dot{display:inline-block;margin-left:4px;background:var(--orange);color:#fff;font-size:10.5px;border-radius:999px;padding:0 6px;min-width:18px;line-height:17px;vertical-align:1px}
+  .tabs .dot{display:inline-block;margin-left:3px;background:var(--orange);color:#fff;font-size:10.5px;border-radius:999px;padding:0 6px;min-width:18px;line-height:17px;vertical-align:1px}
 
   main{padding:14px 16px calc(96px + var(--safe-b));max-width:760px;margin:0 auto}
   .card{background:var(--card);border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(20,40,80,.08);margin-bottom:10px}
   h2{font-size:17px;margin:4px 0 12px}
+  h3{font-size:15px;margin:16px 0 8px;color:var(--blue-d)}
   label{display:block;font-size:13px;color:#4A5568;margin:10px 0 4px}
-  input[type=text],input[type=search],input[type=number],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none}
+  input[type=text],input[type=search],input[type=number],input[type=date],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none;color:var(--text)}
   input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l)}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;padding:11px 16px;font-weight:600;cursor:pointer}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;padding:11px 16px;font-weight:600;cursor:pointer;text-decoration:none}
   .btn.primary{background:var(--blue);color:#fff}
   .btn.orange{background:var(--orange);color:#fff}
   .btn.ghost{background:#EEF1F6;color:var(--text)}
   .btn.danger{background:#FCE8E8;color:var(--red)}
+  .btn.print{background:var(--blue-l);color:var(--blue-d)}
   .btn.block{width:100%}
+  .btn.sm{padding:8px 12px;font-size:13.5px}
   .btn:disabled{opacity:.5}
 
+  .intro{background:var(--blue-l);color:var(--blue-d);border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:10px}
+  .intro.o{background:var(--orange-l);color:#9A4A12}
+  .chips{display:flex;gap:6px;margin-bottom:10px}
+  .chips button{flex:1;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 10px;font-weight:600;color:var(--grey)}
+  .chips button.on{background:var(--blue);border-color:var(--blue);color:#fff}
   .filters{display:flex;gap:8px;margin-bottom:10px}
   .filters input{flex:1;min-width:0}
   .filters select{width:38%}
@@ -59,23 +67,26 @@
   .item .name{font-weight:600;line-height:1.35}
   .item .meta{font-size:12px;color:var(--grey);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .item .more{font-size:12px;color:var(--blue);margin-left:6px;white-space:nowrap}
-  .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;font-weight:600}
+  .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;font-weight:600;white-space:nowrap}
   .b-ok{background:var(--blue-l);color:var(--blue)}
   .b-zero{background:#FCE8E8;color:var(--red)}
   .b-pending{background:var(--orange-l);color:var(--orange)}
   .b-approved{background:#E4F6EC;color:var(--green)}
-  .b-rejected{background:#FCE8E8;color:var(--red)}
+  .b-active{background:var(--blue-l);color:var(--blue)}
+  .b-returned{background:#EEF1F6;color:var(--grey)}
+  .b-rejected,.b-overdue{background:#FCE8E8;color:var(--red)}
   .add{width:44px;height:44px;border-radius:12px;border:0;background:var(--orange);color:#fff;font-size:22px;font-weight:700;flex:none}
+  .add.b{background:var(--blue)}
   .add.in{background:var(--green)}
   .add:disabled{background:#D5DBE5}
   .more-note{text-align:center;color:var(--grey);font-size:13px;padding:6px}
 
   .cartbar{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:10px 16px calc(10px + var(--safe-b));
     background:linear-gradient(to top,var(--bg) 70%,rgba(244,246,250,0))}
-  .cartbar .btn{max-width:728px;margin:0 auto;display:flex;box-shadow:0 6px 18px rgba(244,121,32,.35)}
+  .cartbar .btn{max-width:728px;margin:0 auto;display:flex;box-shadow:0 6px 18px rgba(20,40,80,.25)}
 
   .sheet-bg{position:fixed;inset:0;background:rgba(15,25,45,.45);z-index:30}
-  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:#fff;border-radius:18px 18px 0 0;max-height:88vh;overflow:auto;
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:#fff;border-radius:18px 18px 0 0;max-height:90vh;overflow:auto;
     padding:16px 16px calc(16px + var(--safe-b));max-width:760px;margin:0 auto}
   .sheet .grab{width:40px;height:4px;background:#D5DBE5;border-radius:4px;margin:0 auto 12px}
   .cline{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -85,7 +96,6 @@
   .qty input{width:64px;text-align:center;padding:6px}
   .rm{border:0;background:none;color:var(--red);font-size:13px;padding:2px 0}
 
-  /* รายละเอียดพัสดุ */
   .dimg{width:100%;max-height:240px;object-fit:contain;border-radius:12px;background:var(--blue-l);margin-bottom:12px}
   .dnoimg{height:110px;border-radius:12px;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:44px;margin-bottom:12px}
   .dname{font-size:18px;font-weight:700;line-height:1.35;margin-bottom:10px}
@@ -100,10 +110,15 @@
   .req td{padding:5px 0;border-top:1px solid var(--line)}
   .req td.r{text-align:right;white-space:nowrap;padding-left:8px}
   .req .tot{display:flex;justify-content:space-between;margin-top:8px;font-weight:600}
-  .req .acts{display:flex;gap:8px;margin-top:10px}
+  .req .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
   .req .acts .btn{flex:1}
+  .dates{margin-top:6px;font-size:13.5px}
+  .dates b{color:var(--blue-d)}
+  .dates b.late{color:var(--red)}
   .note{font-size:13px;color:#555;margin-top:6px}
-  .link{color:var(--blue);font-weight:600;text-decoration:none}
+  .seg{display:flex;background:#E7EBF2;border-radius:12px;padding:3px;margin-bottom:12px}
+  .seg button{flex:1;border:0;background:transparent;border-radius:10px;padding:8px;font-weight:600;color:var(--grey)}
+  .seg button.on{background:#fff;color:var(--blue-d);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 
   .center{text-align:center;padding:40px 10px;color:var(--grey)}
   .spin{width:36px;height:36px;border:4px solid var(--blue-l);border-top-color:var(--blue);border-radius:50%;margin:0 auto 12px;animation:sp 1s linear infinite}
@@ -118,12 +133,13 @@
 <div class="top">
   <div class="top-in">
     <div class="row">
-      <div><div class="t">ระบบเบิกพัสดุ</div><div class="s">ศูนย์เกษตร อาหาร และพลังงาน สจล. ชุมพร</div></div>
+      <div><div class="t">ระบบเบิก-ยืมพัสดุ</div><div class="s">ศูนย์เกษตร อาหาร และพลังงาน สจล. ชุมพร</div></div>
       <span class="who hidden" id="who"></span>
     </div>
     <div class="tabs hidden" id="tabs">
-      <button data-v="items" class="on">📦 เบิกพัสดุ</button>
-      <button data-v="mine">📋 คำขอของฉัน</button>
+      <button data-v="items" class="on">📦 เบิก</button>
+      <button data-v="borrow">🔁 ยืม</button>
+      <button data-v="mine">📋 ของฉัน</button>
       <button data-v="approve" id="tab-approve" class="hidden">✔️ อนุมัติ<span class="dot hidden" id="pend-dot"></span></button>
     </div>
   </div>
@@ -136,7 +152,7 @@
   <section id="v-register" class="hidden">
     <div class="card">
       <h2>ลงทะเบียนใช้งาน</h2>
-      <p style="margin-top:-6px;color:var(--grey);font-size:13px">ลงทะเบียนครั้งเดียว ผู้ดูแลจะอนุมัติบัญชีก่อนเริ่มเบิกพัสดุ</p>
+      <p style="margin-top:-6px;color:var(--grey);font-size:13px">ลงทะเบียนครั้งเดียว ผู้ดูแลจะอนุมัติบัญชีก่อนเริ่มใช้งาน</p>
       <label>ชื่อ-สกุล *</label>
       <input type="text" id="r-name" placeholder="เช่น นายสมชาย ใจดี">
       <label>หน่วยงาน / ตำแหน่ง</label>
@@ -154,9 +170,15 @@
     </div>
   </section>
 
+  <!-- เบิก / ยืม ใช้รายการชุดเดียวกัน -->
   <section id="v-items" class="hidden">
+    <div class="intro o" id="intro"></div>
+    <div class="chips hidden" id="srcChips">
+      <button data-src="asset" class="on">🖥️ ครุภัณฑ์</button>
+      <button data-src="stock">📦 พัสดุ</button>
+    </div>
     <div class="filters">
-      <input type="search" id="q" placeholder="🔎 ค้นหาชื่อ / รหัสพัสดุ">
+      <input type="search" id="q" placeholder="🔎 ค้นหาชื่อ / รหัส">
       <select id="ftype"><option value="">ทุกประเภท</option></select>
     </div>
     <div class="count" id="count"></div>
@@ -164,12 +186,12 @@
   </section>
 
   <section id="v-mine" class="hidden">
-    <h2>คำขอของฉัน</h2>
+    <div class="seg" id="mineSeg"><button data-t="issue" class="on">📦 ใบเบิกของฉัน</button><button data-t="borrow">🔁 ใบยืมของฉัน</button></div>
     <div id="mine"></div>
   </section>
 
   <section id="v-approve" class="hidden">
-    <h2>คำขอรออนุมัติ</h2>
+    <div class="seg" id="apSeg"><button data-t="pending" class="on">รออนุมัติ <span id="ap-n1"></span></button><button data-t="active">กำลังยืม / รับคืน <span id="ap-n2"></span></button></div>
     <div id="approve"></div>
   </section>
 </main>
@@ -180,17 +202,24 @@
 <div class="sheet-bg hidden" id="sheet-bg"></div>
 <div class="sheet hidden" id="sheet">
   <div class="grab"></div>
-  <h2>รายการที่จะเบิก</h2>
+  <h2 id="sheet-title">รายการที่จะเบิก</h2>
   <div id="cart"></div>
-  <label>วัตถุประสงค์การเบิก *</label>
+  <div id="borrowFields" class="hidden">
+    <div class="two">
+      <div><label>วันที่ยืม *</label><input type="date" id="b-date"></div>
+      <div><label>วันที่คืน *</label><input type="date" id="b-due"></div>
+    </div>
+    <label>ชื่อผู้ยืม *</label><input type="text" id="b-name">
+    <label>ตำแหน่ง *</label><input type="text" id="b-pos">
+  </div>
+  <label id="purpose-lbl">วัตถุประสงค์การเบิก *</label>
   <textarea id="purpose" rows="2" placeholder="เช่น ใช้ใส่แปลงสาธิตปาล์มน้ำมัน"></textarea>
   <div style="height:14px"></div>
-  <button class="btn primary block" id="submit">ส่งคำขอเบิก</button>
+  <button class="btn primary block" id="submit">ส่งคำขอ</button>
   <div style="height:8px"></div>
   <button class="btn ghost block" id="close-sheet">เลือกรายการเพิ่ม</button>
 </div>
 
-<!-- รายละเอียดพัสดุ -->
 <div class="sheet-bg hidden" id="detail-bg"></div>
 <div class="sheet hidden" id="detail">
   <div class="grab"></div>
@@ -199,7 +228,7 @@
 
 <script>
 /* ===== ตั้งค่า ===== */
-const LIFF_ID = '2011955503-BmfqJ0sl';
+const LIFF_ID = 'ใส่_LIFF_ID';
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbzd6x0zhaGDK-r_ZGRGmsVwOvX8qVCrqI56N_mBSjt6XlN87XCgk9P5e4lGP7Xkxtl1/exec';
 /* ================== */
 
@@ -207,21 +236,23 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => (Math.round((+n || 0) * 100) / 100).toLocaleString('th-TH', {maximumFractionDigits: 2});
 const money = n => (+n || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-const key = it => it.code + '||' + it.name;
+const key = it => (it.src || 'stock') + '|' + it.code + '|' + it.name;
+const ymd = off => { const d = new Date(Date.now() + (off || 0) * 864e5); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 
-let ME = null, ITEMS = [], CART = [], VIEW = 'items';
+let ME = null, VIEW = 'items', BSRC = 'asset', MINE_T = 'issue', AP_T = 'pending';
+const POOL = { stock: [], asset: [] };
+const CART = { items: [], borrow: [] };
+let AP_DATA = null;
 
 async function api(action, data = {}) {
   const res = await fetch(GAS_URL, {
-    method: 'POST',
-    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'},
     body: JSON.stringify(Object.assign({action, idToken: liff.getIDToken()}, data))
   });
   const j = await res.json();
   if (!j.ok && /expired|หมดอายุ/i.test(j.error || '')) { liff.logout(); liff.login({redirectUri: location.href}); throw new Error('relogin'); }
   return j;
 }
-
 function toast(msg, err) {
   const t = document.createElement('div');
   t.className = 'toast' + (err ? ' err' : '');
@@ -233,6 +264,12 @@ function show(id) {
   ['loading','fatal','v-register','v-wait','v-items','v-mine','v-approve'].forEach(x => $('#' + x).classList.toggle('hidden', x !== id));
 }
 function fatal(msg) { $('#fatal').textContent = msg; show('fatal'); }
+/** เปิดหน้าพิมพ์ในเบราว์เซอร์ของเครื่อง (Chrome/Safari) ซึ่งพิมพ์หรือบันทึก PDF ได้ */
+function openPrint(url) {
+  if (!url) return;
+  try { if (liff.isInClient()) return liff.openWindow({url, external: true}); } catch (e) {}
+  window.open(url, '_blank');
+}
 
 async function main() {
   try { await liff.init({liffId: LIFF_ID}); } catch (e) { return fatal('เริ่มต้น LINE ไม่สำเร็จ: ' + e.message); }
@@ -265,8 +302,10 @@ function startApp() {
   $('#who').classList.remove('hidden');
   $('#tabs').classList.remove('hidden');
   $('#tab-approve').classList.toggle('hidden', !ME.user.isApprover);
-  const page = new URLSearchParams(location.search).get('page');
-  go(page === 'approve' && ME.user.isApprover ? 'approve' : page === 'mine' ? 'mine' : 'items');
+  const qs = new URLSearchParams(location.search);
+  const page = qs.get('page');
+  if (qs.get('tab') === 'borrow') setMineTab('borrow');
+  go(page === 'approve' && ME.user.isApprover ? 'approve' : ['mine', 'borrow'].includes(page) ? page : 'items');
   if (ME.user.isApprover && page !== 'approve') loadPendingCount();
 }
 
@@ -275,45 +314,64 @@ document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => go(b.da
 function go(v) {
   VIEW = v;
   document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
-  show('v-' + v);
+  show(v === 'borrow' ? 'v-items' : 'v-' + v);
   renderCartBar();
   window.scrollTo(0, 0);
-  if (v === 'items') loadItems();
+  if (v === 'items' || v === 'borrow') {
+    const b = v === 'borrow';
+    $('#intro').className = 'intro' + (b ? '' : ' o');
+    $('#intro').innerHTML = b ? '🔁 <b>ยืมพัสดุ/ครุภัณฑ์</b> — ยืมแล้วต้องคืนตามวันที่กำหนด เลือกของแล้วกด <b>+</b>'
+                             : '📦 <b>เบิกพัสดุ</b> — ของใช้สิ้นเปลือง ใช้แล้วไม่ต้องคืน เลือกของแล้วกด <b>+</b>';
+    $('#srcChips').classList.toggle('hidden', !b);
+    $('#q').value = ''; $('#ftype').value = '';
+    loadItems();
+  }
   if (v === 'mine') loadMine();
   if (v === 'approve') loadApprove();
 }
 
 /* ---------- รายการพัสดุ ---------- */
+const curSrc = () => VIEW === 'borrow' ? BSRC : 'stock';
+const curCart = () => CART[VIEW === 'borrow' ? 'borrow' : 'items'];
+document.querySelectorAll('#srcChips button').forEach(b => b.onclick = () => {
+  BSRC = b.dataset.src;
+  document.querySelectorAll('#srcChips button').forEach(x => x.classList.toggle('on', x === b));
+  $('#ftype').value = '';
+  fillTypes(); renderItems();
+});
+
 async function loadItems() {
-  if (!ITEMS.length) $('#items').innerHTML = '<div class="center"><div class="spin"></div>กำลังโหลดรายการ…</div>';
-  const r = await api('items');
+  if (!POOL.stock.length) $('#items').innerHTML = '<div class="center"><div class="spin"></div>กำลังโหลดรายการ…</div>';
+  const r = VIEW === 'borrow' ? await api('borrowItems') : await api('items');
   if (!r.ok) return toast(r.error, true);
-  ITEMS = r.items;
-  const types = [...new Set(ITEMS.map(i => i.type).filter(Boolean))].sort();
+  if (VIEW === 'borrow') { POOL.stock = r.stock; POOL.asset = r.asset; } else { POOL.stock = r.items; }
+  fillTypes(); renderItems();
+}
+function fillTypes() {
+  const list = POOL[curSrc()];
+  const types = [...new Set(list.map(i => i.type).filter(Boolean))].sort();
   const cur = $('#ftype').value;
   $('#ftype').innerHTML = '<option value="">ทุกประเภท</option>' + types.map(t => `<option ${t === cur ? 'selected' : ''}>${esc(t)}</option>`).join('');
-  renderItems();
 }
-
 function renderItems() {
-  const q = $('#q').value.trim().toLowerCase();
-  const t = $('#ftype').value;
-  const list = ITEMS.filter(i => (!t || i.type === t) && (!q || (i.name + ' ' + i.code).toLowerCase().includes(q)));
-  const inCart = new Set(CART.map(c => key(c)));
+  const src = curSrc(), list0 = POOL[src], borrow = VIEW === 'borrow';
+  const q = $('#q').value.trim().toLowerCase(), t = $('#ftype').value;
+  const list = list0.filter(i => (!t || i.type === t) && (!q || (i.name + ' ' + i.code).toLowerCase().includes(q)));
+  const inCart = new Set(curCart().map(c => key(c)));
   $('#count').textContent = `พบ ${list.length} รายการ · แตะที่ชื่อเพื่อดูรายละเอียด`;
   $('#items').innerHTML = list.slice(0, 80).map(it => `
     <div class="card item" data-k="${esc(key(it))}">
-      <div class="pic">${it.image ? `<img src="${esc(it.image)}" alt="" loading="lazy">` : '📦'}</div>
+      <div class="pic">${it.image ? `<img src="${esc(it.image)}" alt="" loading="lazy">` : (it.src === 'asset' ? '🖥️' : '📦')}</div>
       <div class="info">
         <div class="name">${esc(it.name)}</div>
         <div class="meta">${esc(it.code || '-')}${it.loc ? ' · ' + esc(it.loc) : ''}</div>
-        <div style="margin-top:6px"><span class="badge ${it.bal > 0 ? 'b-ok' : 'b-zero'}">คงเหลือ ${fmt(it.bal)} ${esc(it.unit)}</span><span class="more">รายละเอียด ›</span></div>
+        <div style="margin-top:6px"><span class="badge ${it.bal > 0 ? 'b-ok' : 'b-zero'}">${borrow ? 'ให้ยืมได้' : 'คงเหลือ'} ${fmt(it.bal)} ${esc(it.unit)}</span><span class="more">รายละเอียด ›</span></div>
       </div>
-      <button class="add ${inCart.has(key(it)) ? 'in' : ''}" data-add="${esc(key(it))}" ${it.bal > 0 ? '' : 'disabled'} aria-label="เพิ่มลงรายการเบิก">
+      <button class="add ${borrow ? 'b' : ''} ${inCart.has(key(it)) ? 'in' : ''}" data-add="${esc(key(it))}" ${it.bal > 0 ? '' : 'disabled'} aria-label="เพิ่ม">
         ${inCart.has(key(it)) ? '✓' : '+'}</button>
     </div>`).join('') +
     (list.length > 80 ? `<div class="more-note">แสดง 80 จาก ${list.length} รายการ — พิมพ์ค้นหาให้เจาะจงขึ้น</div>` : '') +
-    (!list.length ? '<div class="center">ไม่พบรายการ</div>' : '');
+    (!list.length ? `<div class="center">${src === 'asset' && !list0.length ? 'ยังไม่มีครุภัณฑ์ในระบบ<br>แจ้งเจ้าหน้าที่พัสดุให้เพิ่มรายการ' : 'ไม่พบรายการ'}</div>` : '');
   document.querySelectorAll('#items .item').forEach(el => el.onclick = e => {
     const add = e.target.closest('[data-add]');
     if (add) { e.stopPropagation(); if (!add.disabled) toggleCart(add.dataset.add); return; }
@@ -322,24 +380,26 @@ function renderItems() {
 }
 $('#q').oninput = renderItems;
 $('#ftype').onchange = renderItems;
+const findPool = k => POOL.stock.concat(POOL.asset).find(x => key(x) === k);
 
-/* ---------- รายละเอียดพัสดุ ---------- */
+/* ---------- รายละเอียด ---------- */
 function openDetail(k) {
-  const it = ITEMS.find(x => key(x) === k);
+  const it = findPool(k);
   if (!it) return;
-  const inCart = CART.some(c => key(c) === k);
+  const borrow = VIEW === 'borrow';
+  const inCart = curCart().some(c => key(c) === k);
   $('#detail-body').innerHTML = `
-    ${it.image ? `<img class="dimg" src="${esc(it.image)}" alt="">` : '<div class="dnoimg">📦</div>'}
+    ${it.image ? `<img class="dimg" src="${esc(it.image)}" alt="">` : `<div class="dnoimg">${it.src === 'asset' ? '🖥️' : '📦'}</div>`}
     <div class="dname">${esc(it.name)}</div>
     <div class="dgrid">
-      <div>รหัสบัญชี</div><div>${esc(it.code || '-')}</div>
-      <div>คงเหลือ</div><div style="color:${it.bal > 0 ? 'var(--blue)' : 'var(--red)'}">${fmt(it.bal)} ${esc(it.unit)}</div>
+      <div>${it.src === 'asset' ? 'หมายเลขครุภัณฑ์' : 'รหัสบัญชี'}</div><div>${esc(it.code || '-')}</div>
+      <div>${borrow ? 'ให้ยืมได้' : 'คงเหลือ'}</div><div style="color:${it.bal > 0 ? 'var(--blue)' : 'var(--red)'}">${fmt(it.bal)} ${esc(it.unit)}</div>
       <div>ราคาต่อหน่วย</div><div>${it.price ? money(it.price) + ' บาท' : '-'}</div>
       <div>สถานที่จัดเก็บ</div><div>${esc(it.loc || '-')}</div>
       <div>ประเภท</div><div>${esc(it.type || '-')}</div>
     </div>
-    <button class="btn ${inCart ? 'ghost' : 'orange'} block" id="d-add" ${it.bal > 0 ? '' : 'disabled'}>
-      ${it.bal > 0 ? (inCart ? 'นำออกจากรายการเบิก' : '+ เพิ่มลงรายการเบิก') : 'ของหมด เบิกไม่ได้'}</button>
+    <button class="btn ${inCart ? 'ghost' : (borrow ? 'primary' : 'orange')} block" id="d-add" ${it.bal > 0 ? '' : 'disabled'}>
+      ${it.bal > 0 ? (inCart ? 'นำออกจากรายการ' : (borrow ? '+ เพิ่มลงรายการยืม' : '+ เพิ่มลงรายการเบิก')) : 'ไม่มีของ'}</button>
     <div style="height:8px"></div>
     <button class="btn ghost block" id="d-close">ปิด</button>`;
   $('#d-add').onclick = () => { toggleCart(k); closeDetail(); };
@@ -349,36 +409,55 @@ function openDetail(k) {
 function closeDetail() { $('#detail').classList.add('hidden'); $('#detail-bg').classList.add('hidden'); }
 $('#detail-bg').onclick = closeDetail;
 
-/* ---------- ตะกร้า ---------- */
+/* ---------- ตะกร้า (เบิก / ยืม แยกกัน) ---------- */
 function toggleCart(k) {
-  const i = CART.findIndex(c => key(c) === k);
-  if (i >= 0) CART.splice(i, 1);
+  const cart = curCart();
+  const i = cart.findIndex(c => key(c) === k);
+  if (i >= 0) cart.splice(i, 1);
   else {
-    if (CART.length >= 20) return toast('เบิกได้สูงสุด 20 รายการต่อใบ', true);
-    const it = ITEMS.find(x => key(x) === k);
-    CART.push(Object.assign({qty: 1}, it));
+    if (cart.length >= 20) return toast('ได้สูงสุด 20 รายการต่อใบ', true);
+    const it = findPool(k);
+    cart.push(Object.assign({qty: 1}, it));
     toast('เพิ่ม "' + it.name + '" แล้ว');
   }
   renderItems(); renderCartBar();
 }
 function renderCartBar() {
-  const showBar = VIEW === 'items' && CART.length > 0;
-  $('#cartbar').classList.toggle('hidden', !showBar);
-  $('#cartbtn').textContent = `🧺 ตรวจสอบและส่งคำขอ (${CART.length} รายการ)`;
+  const isList = VIEW === 'items' || VIEW === 'borrow';
+  const cart = curCart();
+  $('#cartbar').classList.toggle('hidden', !(isList && cart.length));
+  $('#cartbtn').className = 'btn block ' + (VIEW === 'borrow' ? 'primary' : 'orange');
+  $('#cartbtn').textContent = VIEW === 'borrow' ? `🔁 กรอกวันที่ยืม-คืน และส่งคำขอ (${cart.length})` : `🧺 ตรวจสอบและส่งคำขอเบิก (${cart.length})`;
 }
 $('#cartbtn').onclick = openSheet;
 $('#close-sheet').onclick = closeSheet;
 $('#sheet-bg').onclick = closeSheet;
-function openSheet() { renderCart(); $('#sheet').classList.remove('hidden'); $('#sheet-bg').classList.remove('hidden'); }
+function openSheet() {
+  const b = VIEW === 'borrow';
+  $('#sheet-title').textContent = b ? 'รายการที่จะยืม' : 'รายการที่จะเบิก';
+  $('#borrowFields').classList.toggle('hidden', !b);
+  $('#purpose-lbl').textContent = b ? 'วัตถุประสงค์การยืม' : 'วัตถุประสงค์การเบิก *';
+  $('#submit').textContent = b ? 'ส่งคำขอยืม' : 'ส่งคำขอเบิก';
+  $('#purpose').placeholder = b ? 'เช่น ใช้ตัดหญ้าแปลงสาธิต / ใช้จัดอบรมเกษตรกร' : 'เช่น ใช้ใส่แปลงสาธิตปาล์มน้ำมัน';
+  if (b) {
+    if (!$('#b-date').value) $('#b-date').value = ymd(0);
+    if (!$('#b-due').value) $('#b-due').value = ymd(7);
+    if (!$('#b-name').value) $('#b-name').value = ME.user.name || '';
+    if (!$('#b-pos').value) $('#b-pos').value = ME.user.dept || '';
+  }
+  renderCart();
+  $('#sheet').classList.remove('hidden'); $('#sheet-bg').classList.remove('hidden');
+}
 function closeSheet() { $('#sheet').classList.add('hidden'); $('#sheet-bg').classList.add('hidden'); renderItems(); renderCartBar(); }
 
 function renderCart() {
-  if (!CART.length) { closeSheet(); return; }
-  $('#cart').innerHTML = CART.map((c, i) => `
+  const cart = curCart();
+  if (!cart.length) { closeSheet(); return; }
+  $('#cart').innerHTML = cart.map((c, i) => `
     <div class="cline">
       <div class="info">
-        <div style="font-weight:600">${esc(c.name)}</div>
-        <div style="font-size:12px;color:var(--grey)">คงเหลือ ${fmt(c.bal)} ${esc(c.unit)}</div>
+        <div style="font-weight:600">${c.src === 'asset' ? '🖥️ ' : ''}${esc(c.name)}</div>
+        <div style="font-size:12px;color:var(--grey)">${VIEW === 'borrow' ? 'ให้ยืมได้' : 'คงเหลือ'} ${fmt(c.bal)} ${esc(c.unit)}</div>
         <button class="rm" data-i="${i}">ลบ</button>
       </div>
       <div class="qty">
@@ -388,42 +467,56 @@ function renderCart() {
       </div>
     </div>`).join('');
   document.querySelectorAll('#cart .qty button').forEach(b => b.onclick = () => {
-    const c = CART[b.dataset.i];
+    const c = cart[b.dataset.i];
     c.qty = Math.max(0, Math.min(c.bal, (+c.qty || 0) + (+b.dataset.d)));
     renderCart();
   });
   document.querySelectorAll('#cart .qty input').forEach(inp => inp.onchange = () => {
-    const c = CART[inp.dataset.i];
+    const c = cart[inp.dataset.i];
     let v = parseFloat(inp.value) || 0;
-    if (v > c.bal) { toast('เกินยอดคงเหลือ (' + fmt(c.bal) + ' ' + c.unit + ')', true); v = c.bal; }
+    if (v > c.bal) { toast('เกินจำนวนที่มี (' + fmt(c.bal) + ' ' + c.unit + ')', true); v = c.bal; }
     c.qty = v; renderCart();
   });
-  document.querySelectorAll('#cart .rm').forEach(b => b.onclick = () => { CART.splice(b.dataset.i, 1); renderCart(); });
+  document.querySelectorAll('#cart .rm').forEach(b => b.onclick = () => { cart.splice(b.dataset.i, 1); renderCart(); });
 }
 
 $('#submit').onclick = async () => {
+  const borrow = VIEW === 'borrow';
+  const cart = curCart();
   const purpose = $('#purpose').value.trim();
-  if (!purpose) return toast('กรุณาระบุวัตถุประสงค์', true);
-  const bad = CART.find(c => !(c.qty > 0));
+  if (!borrow && !purpose) return toast('กรุณาระบุวัตถุประสงค์', true);
+  const bad = cart.find(c => !(c.qty > 0));
   if (bad) return toast('ระบุจำนวนของ "' + bad.name + '"', true);
+  const lines = cart.map(c => ({src: c.src, code: c.code, name: c.name, qty: c.qty}));
+  let payload = {purpose, lines};
+  if (borrow) {
+    payload = Object.assign(payload, {borrowDate: $('#b-date').value, dueDate: $('#b-due').value,
+      name: $('#b-name').value.trim(), position: $('#b-pos').value.trim()});
+    if (!payload.borrowDate || !payload.dueDate) return toast('กรุณาเลือกวันที่ยืมและวันที่คืน', true);
+    if (payload.dueDate < payload.borrowDate) return toast('วันที่คืนต้องไม่ก่อนวันที่ยืม', true);
+    if (!payload.name || !payload.position) return toast('กรุณากรอกชื่อผู้ยืมและตำแหน่ง', true);
+  }
   $('#submit').disabled = true; $('#submit').textContent = 'กำลังส่ง…';
   try {
-    const r = await api('submit', {purpose, lines: CART.map(c => ({code: c.code, name: c.name, qty: c.qty}))});
+    const r = await api(borrow ? 'submitBorrow' : 'submit', payload);
     if (!r.ok) return toast(r.error, true);
-    CART = []; $('#purpose').value = '';
+    cart.length = 0; $('#purpose').value = '';
     closeSheet();
-    toast('ส่งคำขอ ' + r.no + ' แล้ว รอผู้อนุมัติ');
-    try { if (liff.isInClient()) await liff.sendMessages([{type: 'text', text: 'ส่งคำขอเบิกพัสดุ ' + r.no + ' แล้ว'}]); } catch (e) {}
+    toast((borrow ? 'ส่งคำขอยืม ' : 'ส่งคำขอเบิก ') + r.no + ' แล้ว รอผู้อนุมัติ');
+    try { if (liff.isInClient()) await liff.sendMessages([{type: 'text', text: (borrow ? 'ส่งคำขอยืม ' : 'ส่งคำขอเบิกพัสดุ ') + r.no + ' แล้ว'}]); } catch (e) {}
+    setMineTab(borrow ? 'borrow' : 'issue');
     go('mine');
-  } finally { $('#submit').disabled = false; $('#submit').textContent = 'ส่งคำขอเบิก'; }
+  } finally { $('#submit').disabled = false; $('#submit').textContent = borrow ? 'ส่งคำขอยืม' : 'ส่งคำขอเบิก'; }
 };
 
-/* ---------- คำขอ ---------- */
-const BADGE = {'รออนุมัติ': 'b-pending', 'อนุมัติ': 'b-approved', 'ไม่อนุมัติ': 'b-rejected'};
+/* ---------- การ์ดคำขอ ---------- */
+const BADGE = {'รออนุมัติ':'b-pending','อนุมัติ':'b-approved','ไม่อนุมัติ':'b-rejected','กำลังยืม':'b-active','คืนแล้ว':'b-returned'};
+const printBtn = (url, label) => url ? `<button class="btn print sm" data-print="${esc(url)}">🖨️ ${label}</button>` : '';
+
 function reqCard(r, approve) {
   return `<div class="card req">
     <div class="top2">
-      <div><div class="no">${esc(r.no)}</div><div class="sub">${esc(r.dateText)}</div></div>
+      <div><div class="no">📦 ${esc(r.no)}</div><div class="sub">${esc(r.dateText)}</div></div>
       <span class="badge ${BADGE[r.status] || ''}">${esc(r.status)}</span>
     </div>
     ${approve ? `<div style="margin-top:8px;font-weight:600">${esc(r.name)}<span class="sub"> ${esc(r.dept)}</span></div>` : ''}
@@ -431,51 +524,108 @@ function reqCard(r, approve) {
     <table>${r.lines.map(l => `<tr><td>${esc(l.name)}</td><td class="r">${fmt(l.qty)} ${esc(l.unit)}</td></tr>`).join('')}</table>
     <div class="tot"><span>มูลค่ารวม</span><span style="color:var(--blue)">${money(r.total)} บาท</span></div>
     ${r.approver ? `<div class="note">พิจารณาโดย ${esc(r.approver)} · ${esc(r.decidedText)}${r.note ? '<br>หมายเหตุ: ' + esc(r.note) : ''}</div>` : ''}
-    ${r.pdf ? `<div style="margin-top:8px"><a class="link" href="#" data-pdf="${esc(r.pdf)}">📄 เปิดใบเบิกพัสดุ (PDF)</a></div>` : ''}
-    ${approve ? `<input type="text" placeholder="หมายเหตุ (ถ้ามี)" data-note="${esc(r.no)}" style="margin-top:10px">
-      <div class="acts">
-        <button class="btn primary" data-act="approve" data-no="${esc(r.no)}">อนุมัติ</button>
-        <button class="btn danger" data-act="reject" data-no="${esc(r.no)}">ไม่อนุมัติ</button>
-      </div>` : ''}
+    ${approve ? `<input type="text" placeholder="หมายเหตุ (ถ้ามี)" data-note="${esc(r.no)}" style="margin-top:10px">` : ''}
+    <div class="acts">
+      ${approve ? `<button class="btn primary sm" data-act="approve" data-kind="issue" data-no="${esc(r.no)}">อนุมัติ</button>
+        <button class="btn danger sm" data-act="reject" data-kind="issue" data-no="${esc(r.no)}">ไม่อนุมัติ</button>` : ''}
+      ${printBtn(r.printUrl, 'พิมพ์ใบเบิก')}
+    </div>
   </div>`;
 }
-function bindPdf(root) {
-  root.querySelectorAll('[data-pdf]').forEach(a => a.onclick = e => { e.preventDefault(); liff.openWindow({url: a.dataset.pdf, external: true}); });
+function borrowCard(b, mode) {
+  const st = b.overdue ? 'เกินกำหนดคืน' : b.status;
+  return `<div class="card req">
+    <div class="top2">
+      <div><div class="no">🔁 ${esc(b.no)}</div><div class="sub">${esc(b.createdText)}</div></div>
+      <span class="badge ${b.overdue ? 'b-overdue' : (BADGE[b.status] || '')}">${esc(st)}</span>
+    </div>
+    ${mode ? `<div style="margin-top:8px;font-weight:600">${esc(b.name)}<span class="sub"> ${esc(b.position)}</span></div>` : ''}
+    <div class="dates">📅 ยืม <b>${esc(b.borrowText)}</b> → คืน <b class="${b.overdue ? 'late' : ''}">${esc(b.dueText)}</b></div>
+    ${b.purpose ? `<div class="note">วัตถุประสงค์: ${esc(b.purpose)}</div>` : ''}
+    <table>${b.lines.map(l => `<tr><td>${l.src === 'asset' ? '🖥️ ' : ''}${esc(l.name)}</td><td class="r">${fmt(l.qty)} ${esc(l.unit)}</td></tr>`).join('')}</table>
+    ${b.approver ? `<div class="note">${b.status === 'ไม่อนุมัติ' ? 'ไม่อนุมัติ' : 'อนุมัติ'}โดย ${esc(b.approver)} · ${esc(b.approvedText)}${b.returnedText ? '<br>รับคืน ' + esc(b.returnedText) + ' โดย ' + esc(b.receiver) : ''}${b.note ? '<br>หมายเหตุ: ' + esc(b.note) : ''}</div>` : ''}
+    ${mode ? `<input type="text" placeholder="หมายเหตุ (ถ้ามี)" data-note="${esc(b.no)}" style="margin-top:10px">` : ''}
+    <div class="acts">
+      ${mode === 'pending' ? `<button class="btn primary sm" data-act="approve" data-kind="borrow" data-no="${esc(b.no)}">อนุมัติให้ยืม</button>
+        <button class="btn danger sm" data-act="reject" data-kind="borrow" data-no="${esc(b.no)}">ไม่อนุมัติ</button>` : ''}
+      ${mode === 'active' ? `<button class="btn orange sm" data-act="return" data-kind="borrow" data-no="${esc(b.no)}">📥 รับคืนแล้ว</button>` : ''}
+      ${printBtn(b.printUrl, 'พิมพ์ใบยืม')}
+    </div>
+  </div>`;
+}
+function bindCards(root) {
+  root.querySelectorAll('[data-print]').forEach(b => b.onclick = () => openPrint(b.dataset.print));
+  root.querySelectorAll('[data-act]').forEach(b => b.onclick = () => decide(b.dataset.kind, b.dataset.no, b.dataset.act));
 }
 
+/* ---------- ของฉัน ---------- */
+function setMineTab(t) {
+  MINE_T = t;
+  document.querySelectorAll('#mineSeg button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+}
+document.querySelectorAll('#mineSeg button').forEach(b => b.onclick = () => { setMineTab(b.dataset.t); loadMine(); });
 async function loadMine() {
   $('#mine').innerHTML = '<div class="center"><div class="spin"></div></div>';
-  const r = await api('myRequests');
-  if (!r.ok) return toast(r.error, true);
-  $('#mine').innerHTML = r.requests.length ? r.requests.map(x => reqCard(x, false)).join('') : '<div class="center">ยังไม่มีคำขอเบิก</div>';
-  bindPdf($('#mine'));
+  if (MINE_T === 'borrow') {
+    const r = await api('myBorrows');
+    if (!r.ok) return toast(r.error, true);
+    $('#mine').innerHTML = r.borrows.length ? r.borrows.map(b => borrowCard(b, '')).join('') : '<div class="center">ยังไม่มีใบยืม<br><br><button class="btn primary sm" onclick="go(\'borrow\')">🔁 ยืมพัสดุ/ครุภัณฑ์</button></div>';
+  } else {
+    const r = await api('myRequests');
+    if (!r.ok) return toast(r.error, true);
+    $('#mine').innerHTML = r.requests.length ? r.requests.map(x => reqCard(x, false)).join('') : '<div class="center">ยังไม่มีคำขอเบิก</div>';
+  }
+  bindCards($('#mine'));
 }
 
+/* ---------- อนุมัติ ---------- */
+document.querySelectorAll('#apSeg button').forEach(b => b.onclick = () => {
+  AP_T = b.dataset.t;
+  document.querySelectorAll('#apSeg button').forEach(x => x.classList.toggle('on', x === b));
+  renderApprove();
+});
 async function loadPendingCount() {
   try {
     const r = await api('pending');
-    const n = r.ok ? r.requests.length : 0;
+    const n = r.ok ? r.requests.length + r.borrows.length : 0;
     $('#pend-dot').textContent = n; $('#pend-dot').classList.toggle('hidden', !n);
   } catch (e) {}
 }
-
 async function loadApprove() {
   $('#approve').innerHTML = '<div class="center"><div class="spin"></div></div>';
   const r = await api('pending');
   if (!r.ok) return toast(r.error, true);
-  $('#pend-dot').textContent = r.requests.length; $('#pend-dot').classList.toggle('hidden', !r.requests.length);
-  $('#approve').innerHTML = r.requests.length ? r.requests.map(x => reqCard(x, true)).join('') : '<div class="center">ไม่มีคำขอรออนุมัติ 👍</div>';
-  document.querySelectorAll('#approve [data-act]').forEach(b => b.onclick = () => decide(b.dataset.no, b.dataset.act));
+  AP_DATA = r;
+  const n = r.requests.length + r.borrows.length;
+  $('#pend-dot').textContent = n; $('#pend-dot').classList.toggle('hidden', !n);
+  $('#ap-n1').textContent = n ? '(' + n + ')' : '';
+  $('#ap-n2').textContent = r.active.length ? '(' + r.active.length + ')' : '';
+  renderApprove();
 }
-
-async function decide(no, act) {
-  if (!confirm((act === 'approve' ? 'อนุมัติและตัดสต็อก ' : 'ไม่อนุมัติ ') + no + ' ?')) return;
+function renderApprove() {
+  const r = AP_DATA; if (!r) return;
+  let html = '';
+  if (AP_T === 'pending') {
+    if (r.requests.length) html += '<h3>📦 คำขอเบิก</h3>' + r.requests.map(x => reqCard(x, true)).join('');
+    if (r.borrows.length) html += '<h3>🔁 คำขอยืม</h3>' + r.borrows.map(x => borrowCard(x, 'pending')).join('');
+    if (!html) html = '<div class="center">ไม่มีคำขอรออนุมัติ 👍</div>';
+  } else {
+    html = r.active.length ? r.active.map(x => borrowCard(x, 'active')).join('') : '<div class="center">ไม่มีของที่กำลังถูกยืม</div>';
+  }
+  $('#approve').innerHTML = html;
+  bindCards($('#approve'));
+}
+async function decide(kind, no, act) {
+  const ask = act === 'return' ? 'ยืนยันรับคืนของตามใบยืม ' + no + ' ครบแล้ว?' :
+    (act === 'approve' ? (kind === 'borrow' ? 'อนุมัติให้ยืม ' : 'อนุมัติและตัดสต็อก ') : 'ไม่อนุมัติ ') + no + ' ?';
+  if (!confirm(ask)) return;
   const note = (document.querySelector(`[data-note="${CSS.escape(no)}"]`) || {}).value || '';
   document.querySelectorAll('#approve [data-act]').forEach(b => b.disabled = true);
   try {
-    const r = await api('decide', {no, decision: act, note});
+    const action = act === 'return' ? 'returnBorrow' : (kind === 'borrow' ? 'decideBorrow' : 'decide');
+    const r = await api(action, {no, decision: act, note});
     if (!r.ok) toast(r.error, true); else toast(r.message);
-  } finally { ITEMS = []; loadApprove(); }
+  } finally { POOL.stock = []; POOL.asset = []; loadApprove(); }
 }
 
 main();
