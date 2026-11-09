@@ -241,16 +241,23 @@ const CART = { items: [], borrow: [] };
 let AP_DATA = null;
 
 async function api(action, data = {}) {
-  const res = await fetch(GAS_URL, {
-    method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'},
-    body: JSON.stringify(Object.assign({action, idToken: liff.getIDToken()}, data))
-  });
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 30000);
+  let res;
+  try {
+    res = await fetch(GAS_URL, {
+      method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, signal: ctl.signal,
+      body: JSON.stringify(Object.assign({action, idToken: liff.getIDToken()}, data))
+    });
+  } catch (e) {
+    throw new Error(e.name === 'AbortError' ? 'ระบบตอบช้าเกินไป กรุณาลองใหม่' : 'เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่');
+  } finally { clearTimeout(timer); }
   const j = await res.json();
   if (!j.ok && /expired|หมดอายุ/i.test(j.error || '')) { liff.logout(); liff.login({redirectUri: location.href}); throw new Error('relogin'); }
   if (!j.ok && /ไม่รู้จักคำสั่ง/.test(j.error || '')) { oldBackend(); throw new Error('old-backend'); }
   return j;
 }
-const NEED_VERSION = '2026-11-09';
+const NEED_VERSION = '2026-11-09b';
 function oldBackend() {
   if ($('#oldbk')) return;
   const d = document.createElement('div');
@@ -271,6 +278,20 @@ function show(id) {
   ['loading','fatal','v-register','v-wait','v-items','v-mine','v-approve'].forEach(x => $('#' + x).classList.toggle('hidden', x !== id));
 }
 function fatal(msg) { $('#fatal').textContent = msg; show('fatal'); }
+/** แสดงข้อผิดพลาดแทนวงกลมหมุน พร้อมปุ่มลองใหม่ */
+function failBox(el, err, retry) {
+  if (err && err.message === 'old-backend') { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="card center" style="color:var(--text)">⚠️ ' + esc((err && err.message) || err) +
+    '<br><br><button class="btn primary sm" id="retry-' + el.id + '">🔄 ลองใหม่</button></div>';
+  $('#retry-' + el.id).onclick = retry;
+}
+const spinner = '<div class="center"><div class="spin"></div>กำลังโหลด…</div>';
+/* เก็บข้อมูลไว้ในเครื่อง → เปิดครั้งต่อไปขึ้นทันที แล้วค่อยอัปเดตเบื้องหลัง */
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem('stk_' + k) || 'null'); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem('stk_' + k, JSON.stringify(v)); } catch (e) {} }
+};
+let POOL_AT = 0, MINE_DATA = null;
 /** เปิดหน้าพิมพ์ในเบราว์เซอร์ของเครื่อง (Chrome/Safari) ซึ่งพิมพ์หรือบันทึก PDF ได้ */
 function openPrint(url) {
   if (!url) return;
@@ -285,9 +306,22 @@ function openPrint(url) {
   if (!w) location.href = ext;
 }
 
+function applyBoot(r) {
+  if (r.stock) { POOL.stock = r.stock; POOL.asset = r.asset || []; POOL_AT = Date.now(); }
+  if (typeof r.pendingCount === 'number') { $('#pend-dot').textContent = r.pendingCount; $('#pend-dot').classList.toggle('hidden', !r.pendingCount); }
+}
 async function main() {
   try { await liff.init({liffId: LIFF_ID}); } catch (e) { return fatal('เริ่มต้น LINE ไม่สำเร็จ: ' + e.message); }
   if (!liff.isLoggedIn()) return liff.login({redirectUri: location.href});
+  // 1) เปิดทันทีจากข้อมูลที่เคยโหลดไว้
+  const saved = store.get('boot');
+  let started = false;
+  if (saved && saved.user && saved.user.status === 'ใช้งาน' && saved.version === NEED_VERSION) {
+    ME = saved; POOL.stock = saved.stock || []; POOL.asset = saved.asset || [];
+    POOL_AT = Date.now();   // กำลังโหลดของใหม่ผ่าน 'me' อยู่แล้ว ไม่ต้องโหลดซ้ำ
+    startApp(); started = true;
+  }
+  // 2) โหลดข้อมูลล่าสุด (ครั้งเดียวได้ครบ: ผู้ใช้ + รายการพัสดุ + จำนวนรออนุมัติ)
   try {
     const r = await api('me');
     if (!r.ok) return fatal(r.error);
@@ -295,8 +329,14 @@ async function main() {
     if (r.version !== NEED_VERSION) oldBackend();
     if (!r.user) return show('v-register');
     if (r.user.status !== 'ใช้งาน') { $('#wait-msg').textContent = 'สถานะบัญชี: ' + r.user.status; return show('v-wait'); }
-    startApp();
-  } catch (e) { if (e.message !== 'relogin' && e.message !== 'old-backend') fatal('เชื่อมต่อระบบไม่สำเร็จ: ' + e.message); }
+    applyBoot(r);
+    store.set('boot', r);
+    if (!started) startApp();
+    else if (VIEW === 'items' || VIEW === 'borrow') { fillTypes(); renderItems(); }
+  } catch (e) {
+    if (e.message === 'relogin' || e.message === 'old-backend') return;
+    if (started) toast(e.message, true); else fatal(e.message);
+  }
 }
 
 $('#r-btn').onclick = async () => {
@@ -321,7 +361,6 @@ function startApp() {
   const page = qs.get('page');
   if (qs.get('tab') === 'borrow') setMineTab('borrow');
   go(page === 'approve' && ME.user.isApprover ? 'approve' : ['mine', 'borrow'].includes(page) ? page : 'items');
-  if (ME.user.isApprover && page !== 'approve') loadPendingCount();
 }
 
 document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => go(b.dataset.v));
@@ -349,12 +388,19 @@ function go(v) {
 const curList = () => VIEW === 'borrow' ? POOL.stock.concat(POOL.asset) : POOL.stock;
 const curCart = () => CART[VIEW === 'borrow' ? 'borrow' : 'items'];
 
-async function loadItems() {
-  if (!POOL.stock.length) $('#items').innerHTML = '<div class="center"><div class="spin"></div>กำลังโหลดรายการ…</div>';
-  const r = VIEW === 'borrow' ? await api('borrowItems') : await api('items');
-  if (!r.ok) return toast(r.error, true);
-  if (VIEW === 'borrow') { POOL.stock = r.stock; POOL.asset = r.asset; } else { POOL.stock = r.items; }
-  fillTypes(); renderItems();
+async function loadItems(force) {
+  if (POOL.stock.length) { fillTypes(); renderItems(); }
+  else $('#items').innerHTML = spinner;
+  if (!force && POOL.stock.length && Date.now() - POOL_AT < 90000) return;   // ข้อมูลยังใหม่ ไม่ต้องโหลดซ้ำ
+  try {
+    const r = await api('borrowItems');
+    if (!r.ok) throw new Error(r.error);
+    POOL.stock = r.stock; POOL.asset = r.asset; POOL_AT = Date.now();
+    const b = store.get('boot'); if (b) { b.stock = r.stock; b.asset = r.asset; store.set('boot', b); }
+    if (VIEW === 'items' || VIEW === 'borrow') { fillTypes(); renderItems(); }
+  } catch (e) {
+    if (!POOL.stock.length) failBox($('#items'), e, () => loadItems(true));
+  }
 }
 function fillTypes() {
   const list = curList();
@@ -509,12 +555,14 @@ $('#submit').onclick = async () => {
   try {
     const r = await api(borrow ? 'submitBorrow' : 'submit', payload);
     if (!r.ok) return toast(r.error, true);
+    MINE_DATA = null;
     cart.length = 0; $('#purpose').value = '';
     closeSheet();
     toast((borrow ? 'ส่งคำขอยืม ' : 'ส่งคำขอเบิก ') + r.no + ' แล้ว รอผู้อนุมัติ');
     try { if (liff.isInClient()) await liff.sendMessages([{type: 'text', text: (borrow ? 'ส่งคำขอยืม ' : 'ส่งคำขอเบิกพัสดุ ') + r.no + ' แล้ว'}]); } catch (e) {}
     setMineTab(borrow ? 'borrow' : 'issue');
     go('mine');
+  } catch (e) { toast(e.message, true);
   } finally { $('#submit').disabled = false; $('#submit').textContent = borrow ? 'ส่งคำขอยืม' : 'ส่งคำขอเบิก'; }
 };
 
@@ -572,19 +620,30 @@ function setMineTab(t) {
   MINE_T = t;
   document.querySelectorAll('#mineSeg button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
 }
-document.querySelectorAll('#mineSeg button').forEach(b => b.onclick = () => { setMineTab(b.dataset.t); loadMine(); });
-async function loadMine() {
-  $('#mine').innerHTML = '<div class="center"><div class="spin"></div></div>';
+document.querySelectorAll('#mineSeg button').forEach(b => b.onclick = () => { setMineTab(b.dataset.t); renderMine(); });
+function renderMine() {
+  const d = MINE_DATA;
+  if (!d) return;
   if (MINE_T === 'borrow') {
-    const r = await api('myBorrows');
-    if (!r.ok) return toast(r.error, true);
-    $('#mine').innerHTML = r.borrows.length ? r.borrows.map(b => borrowCard(b, '')).join('') : '<div class="center">ยังไม่มีใบยืม<br><br><button class="btn primary sm" onclick="go(\'borrow\')">🔁 ยืมพัสดุ/ครุภัณฑ์</button></div>';
+    $('#mine').innerHTML = d.borrows.length ? d.borrows.map(b => borrowCard(b, '')).join('') : '<div class="center">ยังไม่มีใบยืม<br><br><button class="btn primary sm" onclick="go(\'borrow\')">🔁 ยืมพัสดุ/ครุภัณฑ์</button></div>';
   } else {
-    const r = await api('myRequests');
-    if (!r.ok) return toast(r.error, true);
-    $('#mine').innerHTML = r.requests.length ? r.requests.map(x => reqCard(x, false)).join('') : '<div class="center">ยังไม่มีคำขอเบิก</div>';
+    $('#mine').innerHTML = d.requests.length ? d.requests.map(x => reqCard(x, false)).join('') : '<div class="center">ยังไม่มีคำขอเบิก</div>';
   }
   bindCards($('#mine'));
+}
+async function loadMine() {
+  if (!MINE_DATA) MINE_DATA = store.get('mine');
+  if (MINE_DATA) renderMine(); else $('#mine').innerHTML = spinner;
+  try {
+    const r = await api('mine');
+    if (!r.ok) throw new Error(r.error);
+    MINE_DATA = { requests: r.requests, borrows: r.borrows };
+    store.set('mine', MINE_DATA);
+    if (VIEW === 'mine') renderMine();
+  } catch (e) {
+    if (e.message === 'old-backend') return;
+    if (MINE_DATA) toast(e.message, true); else failBox($('#mine'), e, loadMine);
+  }
 }
 
 /* ---------- อนุมัติ ---------- */
@@ -601,9 +660,12 @@ async function loadPendingCount() {
   } catch (e) {}
 }
 async function loadApprove() {
-  $('#approve').innerHTML = '<div class="center"><div class="spin"></div></div>';
-  const r = await api('pending');
-  if (!r.ok) return toast(r.error, true);
+  if (AP_DATA) renderApprove(); else $('#approve').innerHTML = spinner;
+  let r;
+  try {
+    r = await api('pending');
+    if (!r.ok) throw new Error(r.error);
+  } catch (e) { if (!AP_DATA) failBox($('#approve'), e, loadApprove); else toast(e.message, true); return; }
   AP_DATA = r;
   const n = r.requests.length + r.borrows.length;
   $('#pend-dot').textContent = n; $('#pend-dot').classList.toggle('hidden', !n);
@@ -634,7 +696,8 @@ async function decide(kind, no, act) {
     const action = act === 'return' ? 'returnBorrow' : (kind === 'borrow' ? 'decideBorrow' : 'decide');
     const r = await api(action, {no, decision: act, note});
     if (!r.ok) toast(r.error, true); else toast(r.message);
-  } finally { POOL.stock = []; POOL.asset = []; loadApprove(); }
+  } catch (e) { toast(e.message, true);
+  } finally { POOL_AT = 0; MINE_DATA = null; loadApprove(); }
 }
 
 window.addEventListener('unhandledrejection', e => { if (e.reason && e.reason.message === 'old-backend') e.preventDefault(); });
