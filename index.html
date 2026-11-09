@@ -267,8 +267,15 @@ function fatal(msg) { $('#fatal').textContent = msg; show('fatal'); }
 /** เปิดหน้าพิมพ์ในเบราว์เซอร์ของเครื่อง (Chrome/Safari) ซึ่งพิมพ์หรือบันทึก PDF ได้ */
 function openPrint(url) {
   if (!url) return;
-  try { if (liff.isInClient()) return liff.openWindow({url, external: true}); } catch (e) {}
-  window.open(url, '_blank');
+  const ext = url + (url.includes('?') ? '&' : '?') + 'openExternalBrowser=1';
+  try {
+    if (liff.isInClient()) {
+      toast('กำลังเปิดหน้าพิมพ์ใน Safari / Chrome…');
+      return liff.openWindow({url: ext, external: true});
+    }
+  } catch (e) {}
+  const w = window.open(url, '_blank');
+  if (!w) location.href = ext;
 }
 
 async function main() {
