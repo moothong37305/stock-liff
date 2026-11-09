@@ -263,8 +263,8 @@ function oldBackend() {
   const d = document.createElement('div');
   d.id = 'oldbk'; d.className = 'card';
   d.style.cssText = 'background:#FCE8E8;color:#8A1F1F;border:1px solid #D64545';
-  d.innerHTML = '<b>⚠️ ระบบหลังบ้านยังเป็นเวอร์ชันเก่า</b><br>แจ้งเจ้าหน้าที่พัสดุ: วางโค้ด Code.gs ใหม่ในโปรเจกต์ Apps Script ที่ LINE ใช้อยู่ ' +
-    'แล้วกด Deploy → จัดการการทำให้ใช้งานได้ → ✏️ → เวอร์ชันใหม่';
+  d.innerHTML = '<b>⚠️ ระบบหลังบ้านยังเป็นเวอร์ชันเก่า</b><br>เบิกพัสดุได้ตามปกติ แต่เมนูยืม-คืนและปุ่มพิมพ์จะใช้ได้หลังเจ้าหน้าที่พัสดุ ' +
+    'วาง Code.gs ใหม่ในโปรเจกต์ที่ LINE ใช้ แล้วกด Deploy → จัดการ → ✏️ → เวอร์ชันใหม่';
   document.querySelector('main').prepend(d);
 }
 function toast(msg, err) {
@@ -280,7 +280,6 @@ function show(id) {
 function fatal(msg) { $('#fatal').textContent = msg; show('fatal'); }
 /** แสดงข้อผิดพลาดแทนวงกลมหมุน พร้อมปุ่มลองใหม่ */
 function failBox(el, err, retry) {
-  if (err && err.message === 'old-backend') { el.innerHTML = ''; return; }
   el.innerHTML = '<div class="card center" style="color:var(--text)">⚠️ ' + esc((err && err.message) || err) +
     '<br><br><button class="btn primary sm" id="retry-' + el.id + '">🔄 ลองใหม่</button></div>';
   $('#retry-' + el.id).onclick = retry;
@@ -393,13 +392,15 @@ async function loadItems(force) {
   else $('#items').innerHTML = spinner;
   if (!force && POOL.stock.length && Date.now() - POOL_AT < 90000) return;   // ข้อมูลยังใหม่ ไม่ต้องโหลดซ้ำ
   try {
-    const r = await api('borrowItems');
+    let r;
+    try { r = await api('borrowItems'); }
+    catch (e) { if (e.message !== 'old-backend') throw e; r = await api('items'); r.stock = r.items; r.asset = []; }   // หลังบ้านเก่า
     if (!r.ok) throw new Error(r.error);
-    POOL.stock = r.stock; POOL.asset = r.asset; POOL_AT = Date.now();
+    POOL.stock = r.stock || []; POOL.asset = r.asset || []; POOL_AT = Date.now();
     const b = store.get('boot'); if (b) { b.stock = r.stock; b.asset = r.asset; store.set('boot', b); }
     if (VIEW === 'items' || VIEW === 'borrow') { fillTypes(); renderItems(); }
   } catch (e) {
-    if (!POOL.stock.length) failBox($('#items'), e, () => loadItems(true));
+    if (!POOL.stock.length) failBox($('#items'), e.message === 'old-backend' ? new Error('โหลดรายการไม่ได้') : e, () => loadItems(true));
   }
 }
 function fillTypes() {
@@ -562,7 +563,7 @@ $('#submit').onclick = async () => {
     try { if (liff.isInClient()) await liff.sendMessages([{type: 'text', text: (borrow ? 'ส่งคำขอยืม ' : 'ส่งคำขอเบิกพัสดุ ') + r.no + ' แล้ว'}]); } catch (e) {}
     setMineTab(borrow ? 'borrow' : 'issue');
     go('mine');
-  } catch (e) { toast(e.message, true);
+  } catch (e) { toast(e.message === 'old-backend' ? 'ส่งคำขอยืมยังไม่ได้ — รอเจ้าหน้าที่พัสดุอัปเดตระบบหลังบ้านก่อน' : e.message, true);
   } finally { $('#submit').disabled = false; $('#submit').textContent = borrow ? 'ส่งคำขอยืม' : 'ส่งคำขอเบิก'; }
 };
 
@@ -635,14 +636,19 @@ async function loadMine() {
   if (!MINE_DATA) MINE_DATA = store.get('mine');
   if (MINE_DATA) renderMine(); else $('#mine').innerHTML = spinner;
   try {
-    const r = await api('mine');
+    let r;
+    try { r = await api('mine'); }
+    catch (e) {
+      if (e.message !== 'old-backend') throw e;
+      r = await api('myRequests');                               // หลังบ้านเก่า
+      try { const b = await api('myBorrows'); r.borrows = b.borrows; } catch (e2) { r.borrows = []; }
+    }
     if (!r.ok) throw new Error(r.error);
-    MINE_DATA = { requests: r.requests, borrows: r.borrows };
+    MINE_DATA = { requests: r.requests || [], borrows: r.borrows || [] };
     store.set('mine', MINE_DATA);
     if (VIEW === 'mine') renderMine();
   } catch (e) {
-    if (e.message === 'old-backend') return;
-    if (MINE_DATA) toast(e.message, true); else failBox($('#mine'), e, loadMine);
+    if (MINE_DATA) toast(e.message, true); else failBox($('#mine'), e.message === 'old-backend' ? new Error('โหลดรายการไม่ได้') : e, loadMine);
   }
 }
 
@@ -666,6 +672,7 @@ async function loadApprove() {
     r = await api('pending');
     if (!r.ok) throw new Error(r.error);
   } catch (e) { if (!AP_DATA) failBox($('#approve'), e, loadApprove); else toast(e.message, true); return; }
+  r.requests = r.requests || []; r.borrows = r.borrows || []; r.active = r.active || [];
   AP_DATA = r;
   const n = r.requests.length + r.borrows.length;
   $('#pend-dot').textContent = n; $('#pend-dot').classList.toggle('hidden', !n);
