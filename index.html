@@ -173,10 +173,6 @@
   <!-- เบิก / ยืม ใช้รายการชุดเดียวกัน -->
   <section id="v-items" class="hidden">
     <div class="intro o" id="intro"></div>
-    <div class="chips hidden" id="srcChips">
-      <button data-src="asset" class="on">🖥️ ครุภัณฑ์</button>
-      <button data-src="stock">📦 พัสดุ</button>
-    </div>
     <div class="filters">
       <input type="search" id="q" placeholder="🔎 ค้นหาชื่อ / รหัส">
       <select id="ftype"><option value="">ทุกประเภท</option></select>
@@ -239,7 +235,7 @@ const money = n => (+n || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, 
 const key = it => (it.src || 'stock') + '|' + it.code + '|' + it.name;
 const ymd = off => { const d = new Date(Date.now() + (off || 0) * 864e5); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 
-let ME = null, VIEW = 'items', BSRC = 'asset', MINE_T = 'issue', AP_T = 'pending';
+let ME = null, VIEW = 'items', MINE_T = 'issue', AP_T = 'pending';
 const POOL = { stock: [], asset: [] };
 const CART = { items: [], borrow: [] };
 let AP_DATA = null;
@@ -251,7 +247,18 @@ async function api(action, data = {}) {
   });
   const j = await res.json();
   if (!j.ok && /expired|หมดอายุ/i.test(j.error || '')) { liff.logout(); liff.login({redirectUri: location.href}); throw new Error('relogin'); }
+  if (!j.ok && /ไม่รู้จักคำสั่ง/.test(j.error || '')) { oldBackend(); throw new Error('old-backend'); }
   return j;
+}
+const NEED_VERSION = '2026-11-09';
+function oldBackend() {
+  if ($('#oldbk')) return;
+  const d = document.createElement('div');
+  d.id = 'oldbk'; d.className = 'card';
+  d.style.cssText = 'background:#FCE8E8;color:#8A1F1F;border:1px solid #D64545';
+  d.innerHTML = '<b>⚠️ ระบบหลังบ้านยังเป็นเวอร์ชันเก่า</b><br>แจ้งเจ้าหน้าที่พัสดุ: วางโค้ด Code.gs ใหม่ในโปรเจกต์ Apps Script ที่ LINE ใช้อยู่ ' +
+    'แล้วกด Deploy → จัดการการทำให้ใช้งานได้ → ✏️ → เวอร์ชันใหม่';
+  document.querySelector('main').prepend(d);
 }
 function toast(msg, err) {
   const t = document.createElement('div');
@@ -285,10 +292,11 @@ async function main() {
     const r = await api('me');
     if (!r.ok) return fatal(r.error);
     ME = r;
+    if (r.version !== NEED_VERSION) oldBackend();
     if (!r.user) return show('v-register');
     if (r.user.status !== 'ใช้งาน') { $('#wait-msg').textContent = 'สถานะบัญชี: ' + r.user.status; return show('v-wait'); }
     startApp();
-  } catch (e) { if (e.message !== 'relogin') fatal('เชื่อมต่อระบบไม่สำเร็จ: ' + e.message); }
+  } catch (e) { if (e.message !== 'relogin' && e.message !== 'old-backend') fatal('เชื่อมต่อระบบไม่สำเร็จ: ' + e.message); }
 }
 
 $('#r-btn').onclick = async () => {
@@ -329,7 +337,6 @@ function go(v) {
     $('#intro').className = 'intro' + (b ? '' : ' o');
     $('#intro').innerHTML = b ? '🔁 <b>ยืมพัสดุ/ครุภัณฑ์</b> — ยืมแล้วต้องคืนตามวันที่กำหนด เลือกของแล้วกด <b>+</b>'
                              : '📦 <b>เบิกพัสดุ</b> — ของใช้สิ้นเปลือง ใช้แล้วไม่ต้องคืน เลือกของแล้วกด <b>+</b>';
-    $('#srcChips').classList.toggle('hidden', !b);
     $('#q').value = ''; $('#ftype').value = '';
     loadItems();
   }
@@ -338,14 +345,9 @@ function go(v) {
 }
 
 /* ---------- รายการพัสดุ ---------- */
-const curSrc = () => VIEW === 'borrow' ? BSRC : 'stock';
+/** รายการที่แสดง: เบิก = ทะเบียนพัสดุ (ชีต1) · ยืม = ทะเบียนพัสดุทั้งหมด + ครุภัณฑ์ (ถ้ามี) */
+const curList = () => VIEW === 'borrow' ? POOL.stock.concat(POOL.asset) : POOL.stock;
 const curCart = () => CART[VIEW === 'borrow' ? 'borrow' : 'items'];
-document.querySelectorAll('#srcChips button').forEach(b => b.onclick = () => {
-  BSRC = b.dataset.src;
-  document.querySelectorAll('#srcChips button').forEach(x => x.classList.toggle('on', x === b));
-  $('#ftype').value = '';
-  fillTypes(); renderItems();
-});
 
 async function loadItems() {
   if (!POOL.stock.length) $('#items').innerHTML = '<div class="center"><div class="spin"></div>กำลังโหลดรายการ…</div>';
@@ -355,13 +357,13 @@ async function loadItems() {
   fillTypes(); renderItems();
 }
 function fillTypes() {
-  const list = POOL[curSrc()];
+  const list = curList();
   const types = [...new Set(list.map(i => i.type).filter(Boolean))].sort();
   const cur = $('#ftype').value;
   $('#ftype').innerHTML = '<option value="">ทุกประเภท</option>' + types.map(t => `<option ${t === cur ? 'selected' : ''}>${esc(t)}</option>`).join('');
 }
 function renderItems() {
-  const src = curSrc(), list0 = POOL[src], borrow = VIEW === 'borrow';
+  const list0 = curList(), borrow = VIEW === 'borrow';
   const q = $('#q').value.trim().toLowerCase(), t = $('#ftype').value;
   const list = list0.filter(i => (!t || i.type === t) && (!q || (i.name + ' ' + i.code).toLowerCase().includes(q)));
   const inCart = new Set(curCart().map(c => key(c)));
@@ -378,7 +380,7 @@ function renderItems() {
         ${inCart.has(key(it)) ? '✓' : '+'}</button>
     </div>`).join('') +
     (list.length > 80 ? `<div class="more-note">แสดง 80 จาก ${list.length} รายการ — พิมพ์ค้นหาให้เจาะจงขึ้น</div>` : '') +
-    (!list.length ? `<div class="center">${src === 'asset' && !list0.length ? 'ยังไม่มีครุภัณฑ์ในระบบ<br>แจ้งเจ้าหน้าที่พัสดุให้เพิ่มรายการ' : 'ไม่พบรายการ'}</div>` : '');
+    (!list.length ? '<div class="center">ไม่พบรายการ</div>' : '');
   document.querySelectorAll('#items .item').forEach(el => el.onclick = e => {
     const add = e.target.closest('[data-add]');
     if (add) { e.stopPropagation(); if (!add.disabled) toggleCart(add.dataset.add); return; }
@@ -635,6 +637,7 @@ async function decide(kind, no, act) {
   } finally { POOL.stock = []; POOL.asset = []; loadApprove(); }
 }
 
+window.addEventListener('unhandledrejection', e => { if (e.reason && e.reason.message === 'old-backend') e.preventDefault(); });
 main();
 </script>
 </body>
